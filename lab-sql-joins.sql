@@ -41,3 +41,55 @@ USING (film_id)
 INNER JOIN category as c
 USING (category_id)
 GROUP BY name;
+
+# Bonus:
+
+# Identify the film categories with the longest average running time.
+SELECT name, avg_length AS longest_time
+FROM (
+    SELECT c.name, AVG(f.length) AS avg_length
+    FROM film AS f
+    INNER JOIN film_category AS fc USING (film_id)
+    INNER JOIN category AS c USING (category_id)
+    GROUP BY c.name
+) AS category_avg_lengths
+ORDER BY avg_length DESC
+LIMIT 1;
+
+# Display the top 10 most frequently rented movies in descending order.
+SELECT title, COUNT(rental_date) AS frequency
+FROM film
+INNER JOIN inventory as i USING (film_id)
+INNER JOIN rental r USING (inventory_id)
+GROUP BY title
+ORDER BY frequency DESC
+LIMIT 10;
+
+# Determine if "Academy Dinosaur" can be rented from Store 1.
+
+
+SELECT 
+    CASE 
+        WHEN title = 'Academy Dinosaur' AND store_id = 1 THEN 'Possible' 
+        ELSE 'Not possible' 
+    END AS possibility
+FROM film
+INNER JOIN inventory AS i USING (film_id)
+INNER JOIN store AS s USING (store_id)
+WHERE title = 'Academy Dinosaur' AND store_id = 1
+LIMIT 1;
+
+
+# Provide a list of all distinct film titles, along with their availability status in the inventory.
+# SELECT DISTINCT(title)
+# Include a column indicating whether each title is 'Available' or 'NOT available.'
+# Note that there are 42 titles that are not in the inventory, and this information can be obtained using a CASE statement combined with IFNULL."
+
+SELECT DISTINCT(f.title) AS title,
+    CASE 
+        WHEN i.inventory_id IS NOT NULL THEN 'Available'
+        ELSE 'Not available'
+    END AS availability_status
+FROM film AS f
+LEFT JOIN inventory AS i ON f.film_id = i.film_id;
+
